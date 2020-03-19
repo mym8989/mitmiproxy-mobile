@@ -1,0 +1,8 @@
+FROM python:3
+USER root
+
+
+EXPOSE 8080
+
+ENTRYPOINT ["/bin/bash"] 
+
