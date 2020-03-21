@@ -15,7 +15,7 @@ RUN apt-get install -y nano less
 RUN pip install --upgrade pip
 RUN pip install --upgrade setuptools
 #RUN pip install mitmproxy
-RUN pip install mitmproxy pillow-simd brotli pillow beautifulsoup4 lxml
+RUN pip install mitmproxy pillow-simd brotli pillow beautifulsoup4 lxml cssselect requests cchardet
 
 #RUN /usr/local/bin/mitmdump --ssl-insecure -s /data/fl.py --set stream_large_bodies=10m --ignore-hosts '(mzstatic.com|apple.com|icloud.com|mobilesuica.com|crashlytics.com|google-analytics.com|tokyo-ame2.jwa.or.jp)' --anticomp --set block_global=false --set flow_detail=2
 

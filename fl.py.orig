@@ -1,70 +1,43 @@
 #!/usr/bin/env python3
-#thank you! -> https://qiita.com/tongari0/items/ffa3297630547c3bb712
+#元ネタ https://qiita.com/tongari0/items/ffa3297630547c3bb712
 from PIL import Image
 import io, time, gzip
 import brotli
 from bs4 import BeautifulSoup
 from lxml import html
 from lxml.cssselect import CSSSelector
-import requests
-import cgi
-import time
-
-print("################### init ######################")
-url = "https://280blocker.net/files/280blocker_adblock_nanj_supp.txt"
-blist_txt = requests.get(url).text
-blist = []
-for line in blist_txt.split("\r\n"):
-  if line[:2] == '##':
-    blist.append(line[2:])
-
-print(blist)
-
 
 
 def response(flow):
-  content_type = flow.response.headers.get('Content-Type', '')
-  if content_type.startswith('text/html'):
-    #print("delete ads:" + flow.request.url)
-    charset = 'utf8'
-    if '=' in content_type:
-      charset = content_type.split('=')[1]
-    #htmltxt = flow.response.content
-    #html = BeautifulSoup(flow.response.text, "html.parser")
-    print("delete ads:" + content_type + "->" + charset + ": " + flow.request.url)
-    t1 = time.time()
-    html = BeautifulSoup(flow.response.content, "html.parser", from_encoding=charset )
-    print("           BeautifulSoup:" + str(round(time.time()-t1, 1)) + "sec")
-    if html.head:
-      delcount = 0
-      t1 = time.time()
-      for bkey in blist:
-        for col in html.select(bkey):
-          col.extract()
-          delcount+=1
-      flow.response.content = str(html).encode(charset)
-      print("           " + str(round(time.time()-t1, 1)) + "sec: delcount=" + str(delcount))
-
-    '''
-    RULES_PATH = '/data/280blocker_adblock_nanj_supp.txt'
-    with open(RULES_PATH, 'r') as f:
-      lines = f.read().splitlines()
-
-    # get elemhide rules (prefixed by ##) and create a CSSSelector for each of them
-    rules = [CSSSelector(line[2:]) for line in lines if line[:2] == '##']
-    print("rules=")
-    print(rules)
-    def remove_ads(tree):
-      for rule in rules:
-          for matched in rule(tree):
-              matched.getparent().remove(matched)
-
-    doc = html.document_fromstring(str(flow.response.content))
-    #remove_ads(doc)
-    
-    flow.response.content = str(doc.tostring)
-    '''
+  #print("%%%%%%%%%%%%%%%%%%%%%%%%%%")
   
+  if "example_of_a_simple_html_page.htm" in flow.request.url:
+    #flow.response.content = b""    # bytesタイプのascii文字
+    #print("$$$$$$$$$$$$$$$$$$$$$$$$$" + str(flow.response.content))
+    print("$$$$$$$$$$$$$$$$$$$$$$$$$")
+    html = BeautifulSoup(flow.response.content, "html.parser")
+    if html.head:
+      script = html.new_tag("script", id="mitmproxy")
+      script.string = 'alert("Hello from mitmproxy!")'
+      html.head.insert(0, script)
+      flow.response.content = str(html).encode("utf8")
+  
+  RULES_PATH = '/data/280blocker_adblock_nanj_supp.txt'
+  with open(RULES_PATH, 'r') as f:
+    lines = f.read().splitlines()
+
+  # get elemhide rules (prefixed by ##) and create a CSSSelector for each of them
+  rules = [CSSSelector(line[2:]) for line in lines if line[:2] == '##']
+
+  def remove_ads(tree):
+    for rule in rules:
+        for matched in rule(tree):
+            matched.getparent().remove(matched)
+
+  doc = html.document_fromstring(str(flow.response.content))
+  remove_ads(doc)
+  flow.response.content = str(doc.tostring
+
   if "content-type" in flow.response.headers and "content-length" in flow.response.headers:
     ru = str(flow.request.url)
     ae = str(flow.request.headers["accept-encoding"])
@@ -94,7 +67,7 @@ def response(flow):
          cl2  = int(flow.response.headers["content-length"])
          i = int(cl2 /cl * 100)
          elapsed_time = time.time() - start
-         print("                   image *** compressed %s percent, size = %s/%s bytes, %s to %s, %s is processed, %s sec ***" % (i, cl2, cl, ct, ct2, ru, str(round(elapsed_time, 1))))
+         print("                   image *** compressed %s percent, size = %s/%s bytes, %s to %s, %s is processed, %s sec ***" % (i, cl2, cl, ct, ct2, ru, elapsed_time))
          return
 
      # スキームが http のテキストを gzip 圧縮する
@@ -113,7 +86,7 @@ def response(flow):
              ce2 = str(flow.response.headers["content-encoding"])
              i = int(cl2 / cl * 100)
              elapsed_time = time.time() - start
-             print("                   gzip *** compressed %s percent, size = %s/%s bytes, %s to %s, %s to %s, %s is processed, %s sec ***" % (i, cl2, cl, ct, ct2, ce, ce2, ru, str(round(elapsed_time, 1))))
+             print("                   gzip *** compressed %s percent, size = %s/%s bytes, %s to %s, %s to %s, %s is processed, %s sec ***" % (i, cl2, cl, ct, ct2, ce, ce2, ru, elapsed_time))
 #             return
 
      # スキームが https のテキストを brotli 圧縮する
@@ -131,7 +104,7 @@ def response(flow):
              ce2 = str(flow.response.headers["content-encoding"])
              i = int(cl2 / cl * 100)
              elapsed_time = time.time() - start
-             print("                   brotli *** compressed %s percent, size = %s/%s bytes, %s to %s, %s to %s, %s is processed, %s sec ***" % (i, cl2, cl, ct, ct2, ce, ce2, ru, str(round(elapsed_time, 1))))
+             print("                   brotli *** compressed %s percent, size = %s/%s bytes, %s to %s, %s to %s, %s is processed, %s sec ***" % (i, cl2, cl, ct, ct2, ce, ce2, ru, elapsed_time))
 #             return
 
      else:
