@@ -1,5 +1,6 @@
 from mitmproxy import http
 
+print("################### init script_requestGate.py ######################")
 
 def request(flow: http.HTTPFlow) -> None:
   # pretty_host takes the "Host" header of the request into account,

@@ -1,24 +1,18 @@
 #!/usr/bin/env python3
-
+#thank you! -> https://qiita.com/tongari0/items/ffa3297630547c3bb712
 from PIL import Image
 import io, time, gzip
 import brotli
 from bs4 import BeautifulSoup
+from lxml import html
+from lxml.cssselect import CSSSelector
+import requests
+import cgi
+import time
+
+print("################### init script_imageGate.py ######################")
 
 def response(flow):
-  #print("%%%%%%%%%%%%%%%%%%%%%%%%%%")
-  
-  if "example_of_a_simple_html_page.htm" in flow.request.url:
-    #flow.response.content = b""    # bytesタイプのascii文字
-    #print("$$$$$$$$$$$$$$$$$$$$$$$$$" + str(flow.response.content))
-    print("$$$$$$$$$$$$$$$$$$$$$$$$$")
-    html = BeautifulSoup(flow.response.content, "html.parser")
-    if html.head:
-      script = html.new_tag("script", id="mitmproxy")
-      script.string = 'alert("Hello from mitmproxy!")'
-      html.head.insert(0, script)
-      flow.response.content = str(html).encode("utf8")
-
   if "content-type" in flow.response.headers and "content-length" in flow.response.headers:
     ru = str(flow.request.url)
     ae = str(flow.request.headers["accept-encoding"])
@@ -48,7 +42,7 @@ def response(flow):
          cl2  = int(flow.response.headers["content-length"])
          i = int(cl2 /cl * 100)
          elapsed_time = time.time() - start
-         print("                   image *** compressed %s percent, size = %s/%s bytes, %s to %s, %s is processed, %s sec ***" % (i, cl2, cl, ct, ct2, ru, elapsed_time))
+         print("                   image *** compressed %s percent, size = %s/%s bytes, %s to %s, %s is processed, %s sec ***" % (i, cl2, cl, ct, ct2, ru, str(round(elapsed_time, 1))))
          return
 
      # スキームが http のテキストを gzip 圧縮する
@@ -67,7 +61,7 @@ def response(flow):
              ce2 = str(flow.response.headers["content-encoding"])
              i = int(cl2 / cl * 100)
              elapsed_time = time.time() - start
-             print("                   gzip *** compressed %s percent, size = %s/%s bytes, %s to %s, %s to %s, %s is processed, %s sec ***" % (i, cl2, cl, ct, ct2, ce, ce2, ru, elapsed_time))
+             print("                   gzip *** compressed %s percent, size = %s/%s bytes, %s to %s, %s to %s, %s is processed, %s sec ***" % (i, cl2, cl, ct, ct2, ce, ce2, ru, str(round(elapsed_time, 1))))
 #             return
 
      # スキームが https のテキストを brotli 圧縮する
@@ -85,7 +79,7 @@ def response(flow):
              ce2 = str(flow.response.headers["content-encoding"])
              i = int(cl2 / cl * 100)
              elapsed_time = time.time() - start
-             print("                   brotli *** compressed %s percent, size = %s/%s bytes, %s to %s, %s to %s, %s is processed, %s sec ***" % (i, cl2, cl, ct, ct2, ce, ce2, ru, elapsed_time))
+             print("                   brotli *** compressed %s percent, size = %s/%s bytes, %s to %s, %s to %s, %s is processed, %s sec ***" % (i, cl2, cl, ct, ct2, ce, ce2, ru, str(round(elapsed_time, 1))))
 #             return
 
      else:
